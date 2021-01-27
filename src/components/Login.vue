@@ -5,19 +5,19 @@
         <img src="../assets/logo.png" alt="" />
       </div>
       <!-- 登录表单区域 -->
-      <el-form class="login_form" :model="loginForm">
+      <el-form class="login_form" :model="loginForm" :rules="loginFormRules" ref="loginFormRef">
         <!-- 用户名 -->
-        <el-form-item>
+        <el-form-item prop="username">
           <el-input prefix-icon="iconfont icon-user" v-model="loginForm.username"></el-input>
         </el-form-item>
         <!-- 密码 -->
-        <el-form-item>
+        <el-form-item prop="password">
           <el-input prefix-icon="iconfont icon-3702mima" v-model="loginForm.password" type="password"></el-input>
         </el-form-item>
         <!-- 按钮 -->
         <el-form-item class="btns">
           <el-button type="primary">登录</el-button>
-          <el-button type="info">重置</el-button>
+          <el-button type="info" @click="resetLoginForm">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -32,7 +32,43 @@ export default {
       loginForm: {
         username: '',
         password: ''
+      },
+      // 表单的验证规则
+      loginFormRules: {
+        // 验证用户名
+        username: [
+          {
+            required: true,
+            message: '请输入用户名',
+            trigger: 'blur'
+          },
+          {
+            min: 3,
+            max: 10,
+            message: '长度在 3 到 10 个字符之间',
+            trigger: 'blur'
+          }
+        ],
+        // 验证密码
+        password: [
+          {
+            required: true,
+            message: '请输入密码',
+            trigger: 'blur'
+          },
+          {
+            min: 6,
+            max: 15,
+            message: '长度在 6 到 15 个字符之间',
+            trigger: 'blur'
+          }
+        ]
       }
+    }
+  },
+  methods: {
+    resetLoginForm() {
+      this.$refs.loginFormRef.resetFields()
     }
   }
 }
