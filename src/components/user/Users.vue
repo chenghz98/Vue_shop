@@ -29,7 +29,7 @@
         <el-table-column label="角色" prop="role_name"></el-table-column>
         <el-table-column label="状态">
           <template slot-scope="scope">
-            <el-switch v-model="scope.row.mg_state"></el-switch>
+            <el-switch v-model="scope.row.mg_state" @change="userStateChanged(scope.row)"></el-switch>
           </template>
         </el-table-column>
         <el-table-column label="操作">
@@ -45,11 +45,15 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- 分页组件 -->
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="queryInfo.pagenum" :page-sizes="[1, 2, 5, 10]" :page-size="queryInfo.pagesize" layout="total, sizes, prev, pager, next, jumper" :total="total"></el-pagination>
     </el-card>
   </div>
 </template>
 
 <script>
+import hub from '../../utils/hub.js'
 export default {
   data() {
     return {
@@ -65,6 +69,7 @@ export default {
   },
   created() {
     this.getUserList()
+    hub.$emit('saveNavState', '/users')
   },
   methods: {
     async getUserList() {
@@ -76,9 +81,34 @@ export default {
       }
       this.userlist = res.data.users
       this.total = res.data.total
+    },
+    // 监听 pagesize 改变的事件
+    handleSizeChange(newSize) {
+      this.queryInfo.pagesize = newSize
+      this.getUserList()
+    },
+    // 监听页码值改变的事件
+    handleCurrentChange(newPage) {
+      this.queryInfo.pagenum = newPage
+      this.getUserList()
+    },
+    async userStateChanged(userinfo) {
+      const { data: res } = await this.$http.put(`users/${userinfo.id}/state/${userinfo.mg_state}`)
+      if (res.meta.status !== 200) {
+        // 既然修改失败了，还需要把界面上的状态恢复
+        userinfo.mg_state = !userinfo.mg_state
+        return this.$message.error('更新用户状态失败')
+      }
+      this.$message.success('更新用户状态成功')
     }
   }
 }
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.el-table_1_column_7 .el-button {
+  width: 36px;
+  height: 24px;
+  padding: 6px 12px;
+}
+</style>
